@@ -600,4 +600,18 @@ class JogoEco:
                         inimigo.x += math.cos(ang) * 30
                         inimigo.y += math.sin(ang) * 30
 
-                        
+        # coleta de itens (apenas se revelados por ping)
+        for item in self.itens:
+            if not item["coletado"]:
+                if self.is_revealed(item["pos"], now):
+                    ix, iy = item["pos"]
+                    if math.hypot(ix - self.jogador.x, iy - self.jogador.y) < 28:
+                        item["coletado"] = True
+                        self.pontuacao += 1
+                        for _ in range(QTD_PARTICULAS):
+                            self.particulas.append(Particula(ix, iy))
+
+        for p in self.particulas:
+            p.atualizar(dt)
+        self.particulas = [p for p in self.particulas if p.idade < p.vida]
+               
