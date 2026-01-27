@@ -18,3 +18,10 @@ FREQ = 220.0        # frequência baixa (grave suave)
 DURACAO = 1.0       # 1 segundo (ideal para loop)
 VOLUME = 0.18       # bem baixo (não cansativo)
 SAMPLE_RATE = 44100
+
+# GERAÇÃO 
+n_samples = int(SAMPLE_RATE * DURACAO)
+amp = int(32767 * VOLUME)
+
+frames = bytearray()
+
