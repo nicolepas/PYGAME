@@ -300,7 +300,7 @@ class Inimigo:
                 ny = dy / dist
                 sep_fx += nx * empurrar * FORCA_SEPARACAO_INIMIGO
                 sep_fy += ny * empurrar * FORCA_SEPARACAO_INIMIGO
-                
+
             # comportamento por estado
             if self.estado == EstadoInimigo.PATRULHA:
                 tx, ty = self.pontos_patrulha[self.idx_alvo]
@@ -341,3 +341,14 @@ class Inimigo:
         self.estado = EstadoInimigo.INVESTIGAR
         self.pos_alerta = pos_revelacao
         self.timer_alerta = 2.6
+
+    def desenhar(self, tela, agora):
+        revelado = (self.revelado_ate and agora <= self.revelado_ate)
+        if revelado:
+            pulse = 1.0 + 0.25 * math.sin(time.time() * 10.0)
+            r = int((max(self.imagem.get_width(), self.imagem.get_height())//2 + 8) * pulse)
+            s = pygame.Surface((r*2, r*2), pygame.SRCALPHA)
+            alpha = int(160 * (1 - ((self.revelado_ate - agora) / PING_DURACAO)))
+            pygame.draw.circle(s, (180,220,255, max(60, alpha)), (r, r), r, width=3)
+            tela.blit(s, (int(self.x - r), int(self.y - r)))
+        tela.blit(self.imagem, self.imagem.get_rect(center=(int(self.x), int(self.y))))
