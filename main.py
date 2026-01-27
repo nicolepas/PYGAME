@@ -59,3 +59,19 @@ class EstadoInimigo(Enum):
     PERSEGUIR = 3   # perseguindo diretamente o jogador após ele aparecer com o ping
 
 
+# Procura possíveis caminhos para imagens, considerando traduções de nomes
+def _possible_image_paths(nome):
+    traducoes = {
+        "jogador.png": "player.png",
+        "inimigo.png": "enemy.png",
+        "fundo.png": "bg.png",
+        "item.png": "item.png",
+    }
+    nomes = [nome]
+    if nome in traducoes:
+        nomes.append(traducoes[nome])
+    paths = []
+    for n in nomes:
+        paths.append(DIR_IMG / n)                 # pasta 'assets/imagens'
+        paths.append(DIR_ASSETS / "images" / n)   # pasta alternativa 'assets/images'
+    return paths
