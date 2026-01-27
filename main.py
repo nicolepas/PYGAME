@@ -500,3 +500,40 @@ class JogoEco:
                                 self.snd_ping.play()
                             except Exception:
                                 pass
+                            for inimigo in self.inimigos:
+                                dist = math.hypot(inimigo.x - self.jogador.x, inimigo.y - self.jogador.y)
+                                if dist <= PING_RAIO + 60:
+                                    inimigo.ao_ser_revelado((self.jogador.x, self.jogador.y))
+                                    inimigo.revelado_ate = agora + PING_DURACAO
+                            if qtd_pings >= MAX_PINGS_ATRAIR:
+                                for inimigo in self.inimigos:
+                                    inimigo.estado = EstadoInimigo.PERSEGUIR
+                elif self.estado == EstadoJogo.FIM:
+                    if evento.key == pygame.K_RETURN:
+                        self.reiniciar_jogo()
+                        # tocar ambiente novamente com segurança
+                        if self.canal_ambiente:
+                            try:
+                                self.canal_ambiente.play(self.snd_ambiente, loops=-1)
+                                self.canal_ambiente.set_volume(0.45)
+                            except Exception:
+                                try:
+                                    self.snd_ambiente.play(loops=-1)
+                                except Exception:
+                                    pass
+                        else:
+                            try:
+                                self.snd_ambiente.play(loops=-1)
+                            except Exception:
+                                pass
+                        self.estado = EstadoJogo.JOGANDO
+                    elif evento.key == pygame.K_ESCAPE:
+                        if self.canal_ambiente:
+                            try:
+                                self.canal_ambiente.fadeout(400)
+                            except Exception:
+                                try:
+                                    self.snd_ambiente.stop()
+                                except Exception:
+                                    pass
+                        self.estado = EstadoJogo.MENU
