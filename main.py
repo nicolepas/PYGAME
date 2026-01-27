@@ -537,3 +537,30 @@ class JogoEco:
                                 except Exception:
                                     pass
                         self.estado = EstadoJogo.MENU
+                        
+    def atualizar(self, dt):
+        teclas = pygame.key.get_pressed()
+        self.jogador.atualizar(dt, teclas)
+        now = time.time()
+
+        # passos: usa AudioManager.try_step() (cooldown interno) para evitar bips por frame
+        # --- ÁUDIO: loop enquanto se move ---
+        if self.jogador.movendo and not self._audio_movendo:
+            # começou a se mover
+            self.audio.start_movement(volume=0.22)
+            self._audio_movendo = True
+
+        elif not self.jogador.movendo and self._audio_movendo:
+            # parou de se mover
+            self.audio.stop_movement()
+            self._audio_movendo = False
+
+
+        self.pings = [(x,y,t) for (x,y,t) in self.pings if now - t <= PING_DURACAO]
+
+        attracted = self.jogador.qtd_pings_recentes >= MAX_PINGS_ATRAIR
+
+        for inimigo in self.inimigos:
+            inimigo.atualizar(dt, (self.jogador.x, self.jogador.y), self.inimigos, attracted)
+
+        invencivel_spawn = (now - self.tempo_inicial_invicivel) < INVULNERABILIDADE_INICIAL
