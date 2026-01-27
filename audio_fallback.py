@@ -39,3 +39,13 @@ def load_sound_safe(path_like):
     except Exception:
         return SilentSound(p.name)
 
+
+# AudioManager simples com try_step() 
+class AudioManager:
+    def _init_(self, movement_sound=None, step_sound=None, step_cooldown=0.32):
+        self.movement_sound = load_sound_safe(movement_sound) if movement_sound else SilentSound("movement")
+        self.step_sound = load_sound_safe(step_sound) if step_sound else SilentSound("step")
+        self.step_cooldown = float(step_cooldown)
+        self._last_step = 0.0
+        self._movement_channel = None
+
