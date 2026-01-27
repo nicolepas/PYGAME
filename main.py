@@ -375,3 +375,40 @@ class JogoEco:
         self.img_fundo = carregar_imagem("fundo.png", (LARGURA, ALTURA))
         self.img_item = carregar_imagem("item.png", (24,24))
 
+        # Carrega sons via fallback seguro (retorna Sound ou SilentSound)
+        self.snd_ping = carregar_som("ping.wav")  # tentar ping.wav; carregar_som já aplica fallback
+        # self.snd_ping2 = carregar_som("ping2.wav")  # se quiser alternativa
+        self.snd_ambiente = carregar_som("ambiente.wav")
+        self.snd_perigo = carregar_som("perigo.wav")
+        self.snd_passo = carregar_som("passo.wav")
+
+        # Cria canais apenas se o mixer estiver disponível; caso contrário, deixamos None
+        if PYGAME_MIXER_OK:
+            try:
+                self.canal_ambiente = pygame.mixer.Channel(0)
+                self.canal_sfx = pygame.mixer.Channel(1)
+            except Exception:
+                self.canal_ambiente = None
+                self.canal_sfx = None
+        else:
+            self.canal_ambiente = None
+            self.canal_sfx = None
+
+        # Toca ambiente se possível (com canal quando disponível)
+        if self.snd_ambiente:
+            if self.canal_ambiente:
+                try:
+                    self.canal_ambiente.play(self.snd_ambiente, loops=-1)
+                    self.canal_ambiente.set_volume(0.45)
+                except Exception:
+                    # fallback: usar play direto no objeto (SilentSound ou Sound)
+                    try:
+                        self.snd_ambiente.play(loops=-1)
+                    except Exception:
+                        pass
+            else:
+                try:
+                    self.snd_ambiente.play(loops=-1)
+                except Exception:
+                    pass
+
