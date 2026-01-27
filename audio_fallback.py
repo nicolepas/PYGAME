@@ -49,3 +49,16 @@ class AudioManager:
         self._last_step = 0.0
         self._movement_channel = None
 
+
+    def start_movement(self, volume=0.25):
+        try:
+            ch = self.movement_sound.play(loops=-1)
+            if ch is not None:
+                try: ch.set_volume(volume)
+                except Exception: pass
+            else:
+                try: self.movement_sound.set_volume(volume)
+                except Exception: pass
+            self._movement_channel = ch
+        except Exception:
+            pass
