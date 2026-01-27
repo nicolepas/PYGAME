@@ -697,7 +697,7 @@ class JogoEco:
 
         now = time.time()
 
-        
+
         # desenhar itens: se revelados, mostrar halo + label; se fora da tela, seta aponta para o mais próximo revelado
         itens_revelados = []
         for item in self.itens:
@@ -726,4 +726,11 @@ class JogoEco:
             else:
                 # se não revelado, não desenha
                 pass
+            
 
+             # desenhar inimigos: visíveis por ping posicional ou por revelado_ate
+            for inimigo in self.inimigos:
+                pos_revelada = self.is_revealed((inimigo.x, inimigo.y), now)
+                marcado = (inimigo.revelado_ate and now <= inimigo.revelado_ate)
+                if pos_revelada or marcado:
+                    inimigo.desenhar(self.tela, now)
