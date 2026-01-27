@@ -159,3 +159,24 @@ class Particula:
             # atualiza posição
             self.x += self.vx * dt
             self.y += self.vy * dt
+
+    def desenhar(self, tela):
+        if self.idade >= self.vida:
+            return
+
+        alpha = int(255 * (1 - self.idade / self.vida))
+        alpha = max(0, alpha)
+
+        superficie = pygame.Surface((self.tamanho*2, self.tamanho*2), pygame.SRCALPHA)
+        pygame.draw.circle(
+            superficie,
+            (*self.cor[:3], alpha),
+            (self.tamanho, self.tamanho),
+            self.tamanho
+        )
+
+        tela.blit(
+            superficie,
+            (self.x - self.tamanho, self.y - self.tamanho)
+        )
+
