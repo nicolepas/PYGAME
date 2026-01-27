@@ -238,3 +238,24 @@ class Jogador:
         if invencivel_global:
             return False
         return (agora - self.ultimo_dano) >= COOLDOWN_DANO
+    def registrar_dano(self, agora):
+        self.ultimo_dano = agora
+
+    def desenhar(self, tela, agora):
+        # piscamento visual se invencível (piscando)
+        invencivel = (now := time.time()) - jogo.tempo_inicial_invicivel < INVULNERABILIDADE_INICIAL
+        pos_dano = (now - self.ultimo_dano) < COOLDOWN_DANO
+        alpha = 255
+        if invencivel or pos_dano:
+            # piscar baseado em seno
+            t = math.sin(time.time() * 20.0)
+            alpha = 180 if t > 0.3 else 60
+
+        # aplica transparência
+        surf = pygame.Surface(self.imagem.get_size(), pygame.SRCALPHA)
+        surf.blit(self.imagem, (0,0))
+        arr = pygame.Surface(self.imagem.get_size(), pygame.SRCALPHA)
+        arr.fill((255,255,255,alpha))
+        surf.blit(arr, (0,0), special_flags=pygame.BLEND_RGBA_MULT)
+        tela.blit(surf, surf.get_rect(center=(int(self.x), int(self.y))))
+
