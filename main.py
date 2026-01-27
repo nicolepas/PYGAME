@@ -7,7 +7,7 @@ from enum import Enum
 from pathlib import Path
 
 # Integração com fallback de áudio
-from audio_fallback import AudioManager, load_sound_safe, PYGAME_MIXER_OK
+#################from audio_fallback import AudioManager, load_sound_safe, PYGAME_MIXER_OK
 
 # CONFIGURAÇÃO
 LARGURA, ALTURA = 900, 640   # tamanho da janela do jogo
@@ -44,3 +44,18 @@ VIDA_PARTICULA = 0.6           # tempo de vida de cada partícula (segundos)
 VIDA_INICIAL = 3               # quantidade inicial de vidas
 INVULNERABILIDADE_INICIAL = 1.8  # tempo de invulnerabilidade ao iniciar
 COOLDOWN_DANO = 1.4              # tempo de invulnerabilidade após levar dano
+
+
+# Estados principais do jogo
+class EstadoJogo(Enum):
+    MENU = 1       # tela inicial/menu
+    JOGANDO = 2    # jogo em andamento
+    FIM = 3        # tela de fim de jogo
+
+# Estados de comportamento dos inimigos
+class EstadoInimigo(Enum):
+    PATRULHA = 1    # andando normalmente
+    INVESTIGAR = 2  # procurando jogador após alerta - flash de luz
+    PERSEGUIR = 3   # perseguindo diretamente o jogador após ele aparecer com o ping
+
+
