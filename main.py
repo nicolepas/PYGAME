@@ -220,7 +220,15 @@ class Jogador:
         self.x = max(16, min(LARGURA - 16, self.x))
         self.y = max(16, min(ALTURA - 16, self.y))
         self.rect.center = (int(self.x), int(self.y))
-        
+
     def pode_ping(self, agora):
         return (agora - self.ultimo_ping) >= PING_INTERVALO
+    def fazer_ping(self, agora):
+        self.ultimo_ping = agora
+        self.historico_pings.append(agora)
+        # mantém apenas pings recentes (últimos 5s)
+        self.historico_pings = [t for t in self.historico_pings if agora - t <= 5.0]
+        return len(self.historico_pings)
+
+    @property
 
