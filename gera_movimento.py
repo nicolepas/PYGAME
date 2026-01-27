@@ -33,3 +33,12 @@ for i in range(n_samples):
     sample = amp * math.sin(2 * math.pi * FREQ * t) * mod
 
     frames += struct.pack("<h", int(sample))
+
+with wave.open(str(OUT_FILE), "wb") as wav:
+    wav.setnchannels(1)       # mono
+    wav.setsampwidth(2)       # 16-bit
+    wav.setframerate(SAMPLE_RATE)
+    wav.writeframes(frames)
+
+print(" movimento.wav gerado em:", OUT_FILE.resolve())
+print(" Use este som em loop enquanto o jogador se move.")
