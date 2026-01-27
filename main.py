@@ -94,3 +94,17 @@ def _possible_sound_paths(nome):
         paths.append(DIR_SOM / n)                 # pasta 'assets/sons'
         paths.append(DIR_ASSETS / "sounds" / n)   # pasta alternativa 'assets/sounds'
     return paths
+
+# Carrega imagem, se não encontrar cria um quadrado vermelho como fallback
+def carregar_imagem(nome, fallback_rect=None):
+    for p in _possible_image_paths(nome):
+        try:
+            if p.exists():
+                img = pygame.image.load(str(p)).convert_alpha()
+                return img
+        except Exception:
+            pass
+    w, h = fallback_rect if fallback_rect else (48,48)
+    s = pygame.Surface((w,h), pygame.SRCALPHA)
+    s.fill((180, 80, 80, 255))
+    return s
