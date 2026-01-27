@@ -412,3 +412,19 @@ class JogoEco:
                 except Exception:
                     pass
 
+        # AudioManager: não usamos som de movimento em loop (passamos None), mas habilitamos som de passo com cooldown
+        # step_cooldown definido para 0.32s para replicar seu timing anterior
+        # --- ÁUDIO DE MOVIMENTO (loop contínuo, sem bips) ---
+        self.audio = AudioManager(
+            movement_sound=DIR_SOM / "movimento.wav",  # som contínuo
+            step_sound=None                            # nenhum som de passo
+        )
+
+        # flag interna para detectar início/fim do movimento
+        self._audio_movendo = False
+
+
+        self.particulas = []
+        self.reiniciar_jogo()
+        self.overlay_escuro = pygame.Surface((LARGURA, ALTURA), flags=pygame.SRCALPHA)
+
