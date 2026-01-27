@@ -660,7 +660,32 @@ class JogoEco:
         fonte_footer = pygame.font.SysFont("arial", 18)
         rodape = fonte_footer.render("Pressione ENTER para começar  —  ESPAÇO para emitir eco durante o jogo", True, (200,200,220))
         self.tela.blit(rodape, rodape.get_rect(center=(LARGURA//2, ALTURA - 40)))
-        
+
     def desenhar_particulas(self):
         for p in self.particulas:
             p.desenhar(self.tela)
+
+    def _desenhar_seta_para(self, alvo_pos):
+        ax, ay = alvo_pos
+        jx, jy = self.jogador.x, self.jogador.y
+        dx = ax - jx
+        dy = ay - jy
+        angulo = math.atan2(dy, dx)
+
+        # posição da seta na borda da tela
+        margem = 40
+        cx = LARGURA // 2
+        cy = ALTURA // 2
+        tx = cx + math.cos(angulo) * (cx - margem)
+        ty = cy + math.sin(angulo) * (cy - margem)
+
+        # desenha a seta (triângulo)
+        tamanho_seta = 16
+        pontos = [
+            (tx + math.cos(angulo) * tamanho_seta, ty + math.sin(angulo) * tamanho_seta),
+            (tx + math.cos(angulo + 2.5) * tamanho_seta, ty + math.sin(angulo + 2.5) * tamanho_seta),
+            (tx + math.cos(angulo - 2.5) * tamanho_seta, ty + math.sin(angulo - 2.5) * tamanho_seta),
+        ]
+        pygame.draw.polygon(self.tela, (255, 220, 60), pontos)
+
+        
