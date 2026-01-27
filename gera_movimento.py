@@ -25,3 +25,11 @@ amp = int(32767 * VOLUME)
 
 frames = bytearray()
 
+for i in range(n_samples):
+    t = i / SAMPLE_RATE
+
+    # onda senoidal + leve modulação (fica mais orgânico)
+    mod = 1.0 + 0.08 * math.sin(2 * math.pi * 2.0 * t)
+    sample = amp * math.sin(2 * math.pi * FREQ * t) * mod
+
+    frames += struct.pack("<h", int(sample))
