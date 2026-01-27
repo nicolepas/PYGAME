@@ -631,7 +631,7 @@ class JogoEco:
             self.desenhar_fim()
         pygame.display.flip()
 
-        
+
     def desenhar_menu(self):
         self.tela.fill((8,8,18))
         fonte_titulo = pygame.font.SysFont("arial", 64)
@@ -660,3 +660,7 @@ class JogoEco:
         fonte_footer = pygame.font.SysFont("arial", 18)
         rodape = fonte_footer.render("Pressione ENTER para começar  —  ESPAÇO para emitir eco durante o jogo", True, (200,200,220))
         self.tela.blit(rodape, rodape.get_rect(center=(LARGURA//2, ALTURA - 40)))
+        
+    def desenhar_particulas(self):
+        for p in self.particulas:
+            p.desenhar(self.tela)
