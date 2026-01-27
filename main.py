@@ -737,3 +737,17 @@ class JogoEco:
 
              # desenhar jogador (usa estado global 'jogo' para acessar invencibilidade)
             self.jogador.desenhar(self.tela, now)
+
+              # desenhar pings visuais
+            for (x,y,t) in self.pings:
+                age = now - t
+                frac = age / PING_DURACAO
+                if frac < 1.0:
+                    radius = int(PING_RAIO * (1 - frac*0.35))
+                    alpha = int(200 * (1 - frac))
+                    s = pygame.Surface((radius*2, radius*2), pygame.SRCALPHA)
+                    pygame.draw.circle(s, (180,220,255,alpha), (radius, radius), radius, width=3)
+                    self.tela.blit(s, (x-radius, y-radius))
+                    cp = pygame.Surface((48,48), pygame.SRCALPHA)
+                    pygame.draw.circle(cp, (180,220,255,int(200*(1-frac))), (24,24), int(14*(1-frac)), width=2)
+                    self.tela.blit(cp, (x-24, y-24))
