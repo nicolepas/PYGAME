@@ -327,3 +327,17 @@ class Inimigo:
             self.x = max(8, min(LARGURA-8, self.x))
             self.y = max(8, min(ALTURA-8, self.y))
             self.rect.center = (int(self.x), int(self.y))
+    def mover_para(self, tx, ty, dt, speed):
+        dx = tx - self.x
+        dy = ty - self.y
+        dist = math.hypot(dx, dy)
+        if dist > 1:
+            nx = dx / dist
+            ny = dy / dist
+            self.x += nx * speed * dt
+            self.y += ny * speed * dt
+
+    def ao_ser_revelado(self, pos_revelacao):
+        self.estado = EstadoInimigo.INVESTIGAR
+        self.pos_alerta = pos_revelacao
+        self.timer_alerta = 2.6
