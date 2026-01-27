@@ -614,7 +614,7 @@ class JogoEco:
         for p in self.particulas:
             p.atualizar(dt)
         self.particulas = [p for p in self.particulas if p.idade < p.vida]
-        
+
     def is_revealed(self, pos, agora):
         px, py = pos
         for (x,y,t) in self.pings:
@@ -630,3 +630,33 @@ class JogoEco:
         elif self.estado == EstadoJogo.FIM:
             self.desenhar_fim()
         pygame.display.flip()
+
+        
+    def desenhar_menu(self):
+        self.tela.fill((8,8,18))
+        fonte_titulo = pygame.font.SysFont("arial", 64)
+        titulo = fonte_titulo.render("ECO", True, (220,220,255))
+        self.tela.blit(titulo, titulo.get_rect(center=(LARGURA//2, 90)))
+
+        fonte_h = pygame.font.SysFont("arial", 20)
+        linhas = [
+            "Objetivo: Explore emitindo ecos (PING) para revelar itens e inimigos.",
+            "Itens revelados têm um brilho e uma seta aponta para o item mais próximo.",
+            "",
+            "Controles:",
+            "  - Mover: WASD ou setas",
+            "  - Ping / Eco: ESPAÇO",
+            "  - Iniciar jogo: ENTER",
+            "  - Sair: ESC no menu",
+            "",
+            "Vida: começa com 3 vidas. Após levar dano há um curto cooldown (1.4s) para evitar perdas rápidas.",
+        ]
+        y = 170
+        for linha in linhas:
+            txt = fonte_h.render(linha, True, (210,210,230))
+            self.tela.blit(txt, (80, y))
+            y += 26
+
+        fonte_footer = pygame.font.SysFont("arial", 18)
+        rodape = fonte_footer.render("Pressione ENTER para começar  —  ESPAÇO para emitir eco durante o jogo", True, (200,200,220))
+        self.tela.blit(rodape, rodape.get_rect(center=(LARGURA//2, ALTURA - 40)))
