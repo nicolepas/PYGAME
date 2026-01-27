@@ -427,4 +427,36 @@ class JogoEco:
         self.particulas = []
         self.reiniciar_jogo()
         self.overlay_escuro = pygame.Surface((LARGURA, ALTURA), flags=pygame.SRCALPHA)
+    
+    def reiniciar_jogo(self):
+        self.jogador = Jogador(LARGURA//2, ALTURA//2, self.img_jogador)
+
+        def spawn_seguro(x, y):
+            min_dist = 160
+            if math.hypot(x - self.jogador.x, y - self.jogador.y) < min_dist:
+                angle = random.uniform(0, math.pi*2)
+                x = self.jogador.x + math.cos(angle) * min_dist
+                y = self.jogador.y + math.sin(angle) * min_dist
+                x = max(40, min(LARGURA-40, x))
+                y = max(40, min(ALTURA-40, y))
+            return x, y
+
+        e1x, e1y = spawn_seguro(100, 120)
+        e2x, e2y = spawn_seguro(LARGURA-140, ALTURA-180)
+        e3x, e3y = spawn_seguro(480, 340)
+
+        e1 = Inimigo(e1x, e1y, self.img_inimigo, pontos_patrulha=[(e1x,e1y),(e1x+140,e1y-40),(e1x+140,e1y+40)])
+        e2 = Inimigo(e2x, e2y, self.img_inimigo, pontos_patrulha=[(e2x,e2y),(e2x-140,e2y-40),(e2x-80,e2y+40)])
+        e3 = Inimigo(e3x, e3y, self.img_inimigo, pontos_patrulha=[(e3x-60,e3y),(e3x+60,e3y)])
+        self.inimigos = [e1, e2, e3]
+
+        self.itens = [{"pos": (200, 150), "coletado": False},{"pos": (600, 420), "coletado": False}]
+        self.pings = []
+        self.tempo_inicio = time.time()
+        self.pontuacao = 0
+        self.vida_jogador = VIDA_INICIAL
+        self.ultimo_tempo_passo = 0.0
+        self.tempo_inicial_invicivel = time.time()
+        self.tempo_ultimo_dano = -999  # timestamp do último dano global (redundante com jogador.ultimo_dano)
+
 
