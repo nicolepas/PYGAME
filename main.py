@@ -180,3 +180,21 @@ class Particula:
             (self.x - self.tamanho, self.y - self.tamanho)
         )
 
+# ENTIDADES
+class Jogador:
+    def _init_(self, x, y, imagem):
+        # posição inicial e sprite
+        self.x = x; self.y = y
+        self.imagem = imagem
+        self.rect = self.imagem.get_rect(center=(x,y))
+
+        # controle de ping (radar)
+        self.ultimo_ping = -999
+        self.historico_pings = []
+
+        # estado de movimento
+        self.movendo = False
+
+        # controle de dano
+        self.ultimo_dano = -999  # timestamp do último dano recebido
+
