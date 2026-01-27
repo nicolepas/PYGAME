@@ -238,6 +238,7 @@ class Jogador:
         if invencivel_global:
             return False
         return (agora - self.ultimo_dano) >= COOLDOWN_DANO
+    
     def registrar_dano(self, agora):
         self.ultimo_dano = agora
 
@@ -259,3 +260,16 @@ class Jogador:
         surf.blit(arr, (0,0), special_flags=pygame.BLEND_RGBA_MULT)
         tela.blit(surf, surf.get_rect(center=(int(self.x), int(self.y))))
 
+class Inimigo:
+    def _init_(self, x, y, imagem, pontos_patrulha=None):
+        self.x = x; self.y = y
+        self.imagem = imagem
+        self.rect = imagem.get_rect(center=(x,y))
+        self.estado = EstadoInimigo.PATRULHA
+        self.pontos_patrulha = pontos_patrulha or [(x,y)]
+        self.idx_alvo = 0
+        self.pos_alerta = None
+        self.timer_alerta = 0.0
+        self.velocidade = VEL_INIMIGO
+        self.vivo = True
+        self.revelado_ate = 0.0
