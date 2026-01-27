@@ -734,3 +734,6 @@ class JogoEco:
                 marcado = (inimigo.revelado_ate and now <= inimigo.revelado_ate)
                 if pos_revelada or marcado:
                     inimigo.desenhar(self.tela, now)
+
+             # desenhar jogador (usa estado global 'jogo' para acessar invencibilidade)
+            self.jogador.desenhar(self.tela, now)
