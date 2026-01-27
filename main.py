@@ -7,7 +7,7 @@ from enum import Enum
 from pathlib import Path
 
 # Integração com fallback de áudio
-#################from audio_fallback import AudioManager, load_sound_safe, PYGAME_MIXER_OK
+from audio_fallback import AudioManager, load_sound_safe, PYGAME_MIXER_OK
 
 # CONFIGURAÇÃO
 LARGURA, ALTURA = 900, 640   # tamanho da janela do jogo
@@ -108,3 +108,16 @@ def carregar_imagem(nome, fallback_rect=None):
     s = pygame.Surface((w,h), pygame.SRCALPHA)
     s.fill((180, 80, 80, 255))
     return s
+
+
+
+# Carrega som usando o fallback seguro (load_sound_safe) — sempre retorna Sound ou SilentSound
+def carregar_som(nome):
+    for p in _possible_sound_paths(nome):
+        try:
+            # load_sound_safe aceita Path e fará fallback se o arquivo não existir ou houver erro
+            return load_sound_safe(p)
+        except Exception:
+            pass
+    # caso nenhum caminho funcione, tenta carregar um path padrão (SilentSound)
+    return load_sound_safe(DIR_SOM / nome)
