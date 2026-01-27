@@ -121,3 +121,27 @@ def carregar_som(nome):
             pass
     # caso nenhum caminho funcione, tenta carregar um path padrão (SilentSound)
     return load_sound_safe(DIR_SOM / nome)
+
+
+# PARTÍCULAS 
+
+class Particula:
+    def _init_(self, x, y):
+        # posição inicial com pequena variação aleatória
+        self.x = x + random.uniform(-6,6)
+        self.y = y + random.uniform(-6,6)
+
+        # direção e velocidade aleatória
+        angulo = random.uniform(0, math.pi*2)
+        velocidade = random.uniform(80, 220)
+        self.vx = math.cos(angulo) * velocidade
+        self.vy = math.sin(angulo) * velocidade
+
+        # tempo de vida da partícula (com variação)
+        self.vida = random.uniform(VIDA_PARTICULA*0.6, VIDA_PARTICULA*1.1)
+        self.idade = 0.0
+
+        # tamanho e cor da partícula
+        self.tamanho = random.uniform(2.0, 5.0)
+        self.cor = (255, 215, 100)  # amarelo dourado
+
