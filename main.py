@@ -537,7 +537,7 @@ class JogoEco:
                                 except Exception:
                                     pass
                         self.estado = EstadoJogo.MENU
-                        
+
     def atualizar(self, dt):
         teclas = pygame.key.get_pressed()
         self.jogador.atualizar(dt, teclas)
@@ -564,3 +564,40 @@ class JogoEco:
             inimigo.atualizar(dt, (self.jogador.x, self.jogador.y), self.inimigos, attracted)
 
         invencivel_spawn = (now - self.tempo_inicial_invicivel) < INVULNERABILIDADE_INICIAL
+
+        # colisões: usar jogador.pode_levar_dano para respeitar cooldown e invencibilidade
+        for inimigo in self.inimigos:
+            if inimigo.vivo:
+                if math.hypot(inimigo.x - self.jogador.x, inimigo.y - self.jogador.y) < 36:
+                    if self.jogador.pode_levar_dano(now, invencivel_spawn):
+                        # dano efetivo
+                        self.vida_jogador -= 1
+                        self.jogador.registrar_dano(now)
+                        self.tempo_ultimo_dano = now
+                        # empurra inimigo para longe para evitar hits múltiplos
+                        ang = math.atan2(inimigo.y - self.jogador.y, inimigo.x - self.jogador.x)
+                        inimigo.x += math.cos(ang) * 60
+                        inimigo.y += math.sin(ang) * 60
+                        inimigo.estado = EstadoInimigo.PATRULHA
+                        # tocar som de perigo de forma segura
+                        try:
+                            self.snd_perigo.play()
+                        except Exception:
+                            pass
+                        if self.vida_jogador <= 0:
+                            if self.canal_ambiente and self.canal_ambiente.get_busy():
+                                try:
+                                    self.canal_ambiente.fadeout(800)
+                                except Exception:
+                                    try:
+                                        self.snd_ambiente.stop()
+                                    except Exception:
+                                        pass
+                            self.estado = EstadoJogo.FIM
+                    else:
+                        # se não pode levar dano (invencível), empurra inimigo levemente e não causa dano
+                        ang = math.atan2(inimigo.y - self.jogador.y, inimigo.x - self.jogador.x)
+                        inimigo.x += math.cos(ang) * 30
+                        inimigo.y += math.sin(ang) * 30
+
+                        
