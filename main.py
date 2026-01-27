@@ -467,3 +467,36 @@ class JogoEco:
             if self.estado == EstadoJogo.JOGANDO:
                 self.atualizar(dt)
             self.desenhar()
+
+    def tratar_eventos(self):
+        for evento in pygame.event.get():
+            if evento.type == pygame.QUIT:
+                # tenta parar áudio com segurança
+                try:
+                    if self.canal_ambiente:
+                        self.canal_ambiente.stop()
+                except Exception:
+                    pass
+                pygame.quit()
+                sys.exit()
+            elif evento.type == pygame.KEYDOWN:
+                if self.estado == EstadoJogo.MENU:
+                    if evento.key == pygame.K_RETURN:
+                        self.reiniciar_jogo()
+                        self.estado = EstadoJogo.JOGANDO
+                    elif evento.key == pygame.K_ESCAPE:
+                        pygame.quit()
+                        sys.exit()
+                elif self.estado == EstadoJogo.JOGANDO:
+                    if evento.key == pygame.K_ESCAPE:
+                        self.estado = EstadoJogo.MENU
+                    elif evento.key == pygame.K_SPACE:
+                        agora = time.time()
+                        if self.jogador.pode_ping(agora):
+                            qtd_pings = self.jogador.fazer_ping(agora)
+                            self.pings.append((self.jogador.x, self.jogador.y, agora))
+                            # tocar ping (seguro mesmo sem mixer)
+                            try:
+                                self.snd_ping.play()
+                            except Exception:
+                                pass
