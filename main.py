@@ -614,4 +614,19 @@ class JogoEco:
         for p in self.particulas:
             p.atualizar(dt)
         self.particulas = [p for p in self.particulas if p.idade < p.vida]
-               
+        
+    def is_revealed(self, pos, agora):
+        px, py = pos
+        for (x,y,t) in self.pings:
+            if math.hypot(px - x, py - y) <= PING_RAIO:
+                return True
+        return False
+
+    def desenhar(self):
+        if self.estado == EstadoJogo.MENU:
+            self.desenhar_menu()
+        elif self.estado == EstadoJogo.JOGANDO:
+            self.desenhar_jogo()
+        elif self.estado == EstadoJogo.FIM:
+            self.desenhar_fim()
+        pygame.display.flip()
