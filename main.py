@@ -145,3 +145,17 @@ class Particula:
         self.tamanho = random.uniform(2.0, 5.0)
         self.cor = (255, 215, 100)  # amarelo dourado
 
+    def atualizar(self, dt):
+        # aumenta idade da partícula
+        self.idade += dt
+        if self.idade < self.vida:
+            # desaceleração gradual
+            self.vx *= (1.0 - 3.0*dt)
+            self.vy *= (1.0 - 3.0*dt)
+
+            # gravidade puxando para baixo
+            self.vy += 140 * dt
+
+            # atualiza posição
+            self.x += self.vx * dt
+            self.y += self.vy * dt
