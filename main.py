@@ -352,3 +352,26 @@ class Inimigo:
             pygame.draw.circle(s, (180,220,255, max(60, alpha)), (r, r), r, width=3)
             tela.blit(s, (int(self.x - r), int(self.y - r)))
         tela.blit(self.imagem, self.imagem.get_rect(center=(int(self.x), int(self.y))))
+
+
+# JOGO 
+
+class JogoEco:
+    def _init_(self):
+        pygame.init()
+        # evita exception se já inicializado/ambiente sem áudio
+        try:
+            pygame.mixer.init()
+        except Exception:
+            pass
+
+        self.tela = pygame.display.set_mode((LARGURA, ALTURA))
+        pygame.display.set_caption("ECO - aprimorado (PT-BR)")
+        self.relogio = pygame.time.Clock()
+        self.estado = EstadoJogo.MENU
+
+        self.img_jogador = carregar_imagem("jogador.png", (48,48))
+        self.img_inimigo = carregar_imagem("inimigo.png", (48,48))
+        self.img_fundo = carregar_imagem("fundo.png", (LARGURA, ALTURA))
+        self.img_item = carregar_imagem("item.png", (24,24))
+
