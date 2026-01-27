@@ -62,3 +62,24 @@ class AudioManager:
             self._movement_channel = ch
         except Exception:
             pass
+    def stop_movement(self):
+        try:
+            if self._movement_channel:
+                try: self._movement_channel.stop()
+                except Exception: pass
+            try: self.movement_sound.stop()
+            except Exception: pass
+            self._movement_channel = None
+        except Exception:
+            pass
+
+    def try_step(self):
+        now = time.monotonic()
+        if now - self._last_step >= self.step_cooldown:
+            try:
+                self.step_sound.play()
+            except Exception:
+                pass
+            self._last_step = now
+            return True
+        return False
