@@ -460,3 +460,10 @@ class JogoEco:
         self.tempo_ultimo_dano = -999  # timestamp do último dano global (redundante com jogador.ultimo_dano)
 
 
+    def rodar(self):
+        while True:
+            dt = self.relogio.tick(FPS) / 1000.0
+            self.tratar_eventos()
+            if self.estado == EstadoJogo.JOGANDO:
+                self.atualizar(dt)
+            self.desenhar()
