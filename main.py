@@ -696,3 +696,34 @@ class JogoEco:
             pass
 
         now = time.time()
+
+        
+        # desenhar itens: se revelados, mostrar halo + label; se fora da tela, seta aponta para o mais próximo revelado
+        itens_revelados = []
+        for item in self.itens:
+            if item["coletado"]:
+                continue
+            ix, iy = item["pos"]
+            revelado = self.is_revealed((ix, iy), now)
+            if revelado:
+                itens_revelados.append(item)
+                # halo pulsante
+                pulse = 1.0 + 0.25 * math.sin(time.time() * 7.0)
+                r = int(18 * pulse)
+                s = pygame.Surface((r*2, r*2), pygame.SRCALPHA)
+                alpha = int(160 * (0.6 + 0.4 * (1 - ( (now - max(t for (x,y,t) in self.pings if True) - now) ) ))) if self.pings else 140
+                pygame.draw.circle(s, (255,215,100,140), (r, r), r)
+                self.tela.blit(s, (int(ix - r), int(iy - r)))
+                # ícone do item
+                try:
+                    self.tela.blit(self.img_item, self.img_item.get_rect(center=(int(ix), int(iy))))
+                except Exception:
+                    pygame.draw.rect(self.tela, (200,180,20), (int(ix-12), int(iy-12), 24, 24))
+                # rótulo
+                fonte = pygame.font.SysFont("arial", 14)
+                lbl = fonte.render("ITEM", True, (255,215,100))
+                self.tela.blit(lbl, (int(ix - lbl.get_width()//2), int(iy - 26)))
+            else:
+                # se não revelado, não desenha
+                pass
+
