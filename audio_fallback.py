@@ -28,3 +28,14 @@ class SilentSound:
     def set_volume(self, v): pass
     def get_length(self): return 0.0
     def _repr_(self): return f"<SilentSound {self._name}>"
+
+def load_sound_safe(path_like):
+    """Tenta carregar um som via pygame; se falhar, retorna SilentSound"""
+    p = Path(path_like)
+    if not p.exists() or not PYGAME_MIXER_OK:
+        return SilentSound(p.name)
+    try:
+        return pygame.mixer.Sound(str(p))
+    except Exception:
+        return SilentSound(p.name)
+
