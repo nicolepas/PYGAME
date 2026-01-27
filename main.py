@@ -198,3 +198,25 @@ class Jogador:
         # controle de dano
         self.ultimo_dano = -999  # timestamp do último dano recebido
 
+
+    def atualizar(self, dt, teclas):
+        dx = dy = 0
+        # movimentação com WASD ou setas
+        if teclas[pygame.K_w] or teclas[pygame.K_UP]: dy -= 1
+        if teclas[pygame.K_s] or teclas[pygame.K_DOWN]: dy += 1
+        if teclas[pygame.K_a] or teclas[pygame.K_LEFT]: dx -= 1
+        if teclas[pygame.K_d] or teclas[pygame.K_RIGHT]: dx += 1
+
+        # define se está se movendo
+        self.movendo = bool(dx or dy)
+
+        # aplica movimento normalizado
+        if dx or dy:
+            norm = math.hypot(dx, dy)
+            self.x += (dx / norm) * VEL_JOGADOR * dt
+            self.y += (dy / norm) * VEL_JOGADOR * dt
+
+        # limites da tela
+        self.x = max(16, min(LARGURA - 16, self.x))
+        self.y = max(16, min(ALTURA - 16, self.y))
+        self.rect.center = (int(self.x), int(self.y))
