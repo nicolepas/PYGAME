@@ -229,5 +229,12 @@ class Jogador:
         # mantém apenas pings recentes (últimos 5s)
         self.historico_pings = [t for t in self.historico_pings if agora - t <= 5.0]
         return len(self.historico_pings)
-
     @property
+    def qtd_pings_recentes(self):
+        return len(self.historico_pings)
+
+    def pode_levar_dano(self, agora, invencivel_global):
+        # não pode levar dano se ainda em invulnerabilidade global (spawn) ou cooldown pós-dano
+        if invencivel_global:
+            return False
+        return (agora - self.ultimo_dano) >= COOLDOWN_DANO
