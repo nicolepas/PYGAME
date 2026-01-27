@@ -688,4 +688,11 @@ class JogoEco:
         ]
         pygame.draw.polygon(self.tela, (255, 220, 60), pontos)
 
-        
+    def desenhar_jogo(self):
+        self.tela.fill((0,0,0))
+        try:
+            self.tela.blit(pygame.transform.scale(self.img_fundo, (LARGURA, ALTURA)), (0,0))
+        except Exception:
+            pass
+
+        now = time.time()
