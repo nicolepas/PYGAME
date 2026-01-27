@@ -75,3 +75,22 @@ def _possible_image_paths(nome):
         paths.append(DIR_IMG / n)                 # pasta 'assets/imagens'
         paths.append(DIR_ASSETS / "images" / n)   # pasta alternativa 'assets/images'
     return paths
+
+
+# Procura possíveis caminhos para sons, também com traduções
+def _possible_sound_paths(nome):
+    traducoes = {
+        "ambiente.wav": "ambient.wav",
+        "perigo.wav": "danger.wav",
+        "passo.wav": "footstep.wav",
+        "ping.wav": "ping.wav",
+        "ping2.wav": "ping2.wav",
+    }
+    nomes = [nome]
+    if nome in traducoes:
+        nomes.append(traducoes[nome])
+    paths = []
+    for n in nomes:
+        paths.append(DIR_SOM / n)                 # pasta 'assets/sons'
+        paths.append(DIR_ASSETS / "sounds" / n)   # pasta alternativa 'assets/sounds'
+    return paths
