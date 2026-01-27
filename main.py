@@ -300,3 +300,30 @@ class Inimigo:
                 ny = dy / dist
                 sep_fx += nx * empurrar * FORCA_SEPARACAO_INIMIGO
                 sep_fy += ny * empurrar * FORCA_SEPARACAO_INIMIGO
+                
+            # comportamento por estado
+            if self.estado == EstadoInimigo.PATRULHA:
+                tx, ty = self.pontos_patrulha[self.idx_alvo]
+                self.mover_para(tx, ty, dt, self.velocidade)
+                if math.hypot(self.x - tx, self.y - ty) < 8:
+                    self.idx_alvo = (self.idx_alvo + 1) % len(self.pontos_patrulha)
+            elif self.estado == EstadoInimigo.INVESTIGAR:
+                if self.pos_alerta:
+                    tx, ty = self.pos_alerta
+                    self.mover_para(tx, ty, dt, VEL_INIMIGO_ALERTA)
+                    if math.hypot(self.x - tx, self.y - ty) < 10:
+                        self.timer_alerta -= dt
+                        if self.timer_alerta <= 0:
+                            self.estado = EstadoInimigo.PATRULHA
+                            self.pos_alerta = None
+            elif self.estado == EstadoInimigo.PERSEGUIR:
+                self.mover_para(px, py, dt, VEL_INIMIGO_ALERTA)
+
+            # aplica separação
+            self.x += sep_fx * dt
+            self.y += sep_fy * dt
+
+            # limites da tela
+            self.x = max(8, min(LARGURA-8, self.x))
+            self.y = max(8, min(ALTURA-8, self.y))
+            self.rect.center = (int(self.x), int(self.y))
