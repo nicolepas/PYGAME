@@ -231,4 +231,3 @@ class Jogador:
         return len(self.historico_pings)
 
     @property
-
