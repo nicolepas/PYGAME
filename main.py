@@ -273,3 +273,30 @@ class Inimigo:
         self.velocidade = VEL_INIMIGO
         self.vivo = True
         self.revelado_ate = 0.0
+
+    def atualizar(self, dt, pos_jogador, inimigos, atraido=False):
+        if not self.vivo: return
+        px, py = pos_jogador
+
+        # mudança de estado
+        if atraido:
+            self.estado = EstadoInimigo.PERSEGUIR
+        else:
+            if self.estado == EstadoInimigo.PERSEGUIR:
+                self.estado = EstadoInimigo.INVESTIGAR
+                self.pos_alerta = (px, py)
+                self.timer_alerta = 2.4
+
+        # separação entre inimigos (evita sobreposição)
+        sep_fx = sep_fy = 0.0
+        for outro in inimigos:
+            if outro is self or not outro.vivo: continue
+            dx = self.x - outro.x
+            dy = self.y - outro.y
+            dist = math.hypot(dx, dy)
+            if dist > 0 and dist < DIST_SEPARACAO_INIMIGO:
+                empurrar = (DIST_SEPARACAO_INIMIGO - dist) / DIST_SEPARACAO_INIMIGO
+                nx = dx / dist
+                ny = dy / dist
+                sep_fx += nx * empurrar * FORCA_SEPARACAO_INIMIGO
+                sep_fy += ny * empurrar * FORCA_SEPARACAO_INIMIGO
