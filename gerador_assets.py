@@ -23,7 +23,7 @@ except Exception as e:
     print("Aviso: pygame não disponível:", e)
 
 
-# --- Fallback silencioso (mira compatibilidade com pygame.mixer.Sound API) ---
+# Fallback silencioso 
 class SilentChannel:
     """Canal 'vazio' que aceita stop() e set_volume() sem fazer nada."""
     def __init__(self):
@@ -64,8 +64,6 @@ def load_sound_safe(path_like):
     path = Path(path_like)
     if not path.exists():
         # arquivo não existe -> fallback silencioso
-        # print opcional para debug
-        # print(f"Aviso: som não encontrado em {path}, usando SilentSound.")
         return SilentSound(path.name)
     if not PYGAME_MIXER_OK:
         # mixer indisponível -> fallback silencioso
@@ -79,7 +77,7 @@ def load_sound_safe(path_like):
         return SilentSound(path.name)
 
 
-# --- Gerenciador prático para áudio de movimento / passos ---
+# áudio de movimento / passos 
 class AudioManager:
     """
     Gerencia sons de movimento de forma segura.
@@ -95,10 +93,9 @@ class AudioManager:
         self.step_cooldown = float(step_cooldown)
         self._last_step_time = 0.0
 
-        # Channel usado para o loop do movimento (quando disponível)
         self._movement_channel = None
 
-    # --- Controle loop while moving ---
+    # Controle loop while moving
     def start_movement(self, volume=0.25):
         """
         Toca o som de movimento em loop (apenas se não estiver tocando).
@@ -145,7 +142,7 @@ class AudioManager:
         except Exception as e:
             print("Aviso: erro ao tentar parar movimento (silenciado):", e)
 
-    # --- Passos com cooldown ---
+    #Passos com cooldown
     def try_step(self):
         """
         Toca um som de 'passo' respeitando cooldown para evitar bips por frame.
@@ -162,7 +159,7 @@ class AudioManager:
             return True
         return False
 
-    # --- Tocar som único (útil para 'start move' ou outros eventos) ---
+    # Tocar som único 
     def play_once(self, sound):
         """
         Toca uma instância única de som passado (caminho ou Sound). Seguro.
