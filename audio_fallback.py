@@ -1,3 +1,4 @@
+
 """
 Fallback mínimo de áudio: SilentSound + load_sound_safe + AudioManager simples.
 Compatível com o main.py que te enviei.

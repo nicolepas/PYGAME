@@ -22,6 +22,7 @@ except Exception as e:
     # não imprimir muito em produção
     print("Aviso: pygame não disponível:", e)
 
+
 # --- Fallback silencioso (mira compatibilidade com pygame.mixer.Sound API) ---
 class SilentChannel:
     """Canal 'vazio' que aceita stop() e set_volume() sem fazer nada."""
