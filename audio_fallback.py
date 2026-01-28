@@ -19,7 +19,7 @@ except Exception:
     pygame = None
     PYGAME_MIXER_OK = False
 
-# --- Silent fallback simples ---
+# Silent fallback simples 
 class SilentChannel:
     def stop(self): pass
     def set_volume(self, v): pass
