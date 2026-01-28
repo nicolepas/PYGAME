@@ -673,7 +673,9 @@ class JogoEco:
             "  - Iniciar jogo: ENTER",
             "  - Sair: ESC no menu",
             "",
-            "Vida: começa com 3 vidas. Após levar dano há um curto tempo sem levar dano, para evitar perdas rápidas.",
+            "Vida: começa com 3 vidas. ",
+            
+            "Após levar dano há um curto tempo sem levar dano, para evitar perdas rápidas.",
         ]
         y = 170
         for linha in linhas:
