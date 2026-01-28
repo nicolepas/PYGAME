@@ -473,73 +473,182 @@ class JogoEco:
 
     def tratar_eventos(self):
         for evento in pygame.event.get():
-            if evento.type == pygame.QUIT:
-                # tenta parar áudio com segurança
-                try:
-                    if self.canal_ambiente:
-                        self.canal_ambiente.stop()
-                except Exception:
-                    pass
-                pygame.quit()
-                sys.exit()
-            elif evento.type == pygame.KEYDOWN:
-                if self.estado == EstadoJogo.MENU:
-                    if evento.key == pygame.K_RETURN:
-                        self.reiniciar_jogo()
-                        self.estado = EstadoJogo.JOGANDO
-                    elif evento.key == pygame.K_ESCAPE:
-                        pygame.quit()
-                        sys.exit()
-                elif self.estado == EstadoJogo.JOGANDO:
-                    if evento.key == pygame.K_ESCAPE:
-                        self.estado = EstadoJogo.MENU
-                    elif evento.key == pygame.K_SPACE:
-                        agora = time.time()
-                        if self.jogador.pode_ping(agora):
-                            qtd_pings = self.jogador.fazer_ping(agora)
-                            self.pings.append((self.jogador.x, self.jogador.y, agora))
-                            # tocar ping (seguro mesmo sem mixer)
+            try:
+                # Sempre trate QUIT primeiro (click no X da janela)
+                if evento.type == pygame.QUIT:
+                    try:
+                        if self.canal_ambiente:
+                            self.canal_ambiente.stop()
+                    except Exception:
+                        pass
+                    pygame.quit()
+                    sys.exit()
+
+                # Depuração: mostrar que tipo de evento chegou (opcional)
+                # print("evento:", evento)
+
+                if evento.type == pygame.KEYDOWN:
+                    # debug: mostrar qual tecla e estado atual do jogo
+                    # (comenta a linha abaixo se gerar muito log)
+                    print(f"[DEBUG] KEYDOWN: key={evento.key} estado={self.estado}")
+
+                    # MENU: Enter inicia, ESC sai do jogo
+                    if self.estado == EstadoJogo.MENU:
+                        if evento.key == pygame.K_RETURN or evento.key == pygame.K_KP_ENTER:
+                            # teste: print para confirmar que o ENTER foi detectado e que reiniciar_jogo é chamado
+                            print("[DEBUG] ENTER detectado no MENU -> reiniciando jogo e mudando estado para JOGANDO")
                             try:
-                                self.snd_ping.play()
+                                self.reiniciar_jogo()
+                                self.estado = EstadoJogo.JOGANDO
+                            except Exception:
+                                print("[ERROR] exceção em reiniciar_jogo():")
+                                traceback.print_exc()
+                        elif evento.key == pygame.K_ESCAPE:
+                            print("[DEBUG] ESC no MENU -> encerrando")
+                            pygame.quit()
+                            sys.exit()
+
+                    # JOGANDO: ESC retorna ao menu; ESPAÇO faz ping
+                    elif self.estado == EstadoJogo.JOGANDO:
+                        if evento.key == pygame.K_ESCAPE:
+                            print("[DEBUG] ESC durante JOGANDO -> voltar ao MENU")
+                            self.estado = EstadoJogo.MENU
+                        elif evento.key == pygame.K_SPACE:
+                            try:
+                                agora = time.time()
+                                if self.jogador.pode_ping(agora):
+                                    qtd_pings = self.jogador.fazer_ping(agora)
+                                    self.pings.append((self.jogador.x, self.jogador.y, agora))
+                                    try:
+                                        self.snd_ping.play()
+                                    except Exception:
+                                        pass
+                                    for inimigo in self.inimigos:
+                                        dist = math.hypot(inimigo.x - self.jogador.x, inimigo.y - self.jogador.y)
+                                        if dist <= PING_RAIO + 60:
+                                            inimigo.ao_ser_revelado((self.jogador.x, self.jogador.y))
+                                            inimigo.revelado_ate = agora + PING_DURACAO
+                                    if qtd_pings >= MAX_PINGS_ATRAIR:
+                                        for inimigo in self.inimigos:
+                                            inimigo.estado = EstadoInimigo.PERSEGUIR
+                            except Exception:
+                                print("[ERROR] exceção ao processar PING:")
+                                traceback.print_exc()
+
+                    # FIM: Enter reinicia, ESC volta ao menu
+                    elif self.estado == EstadoJogo.FIM:
+                        if evento.key == pygame.K_RETURN or evento.key == pygame.K_KP_ENTER:
+                            print("[DEBUG] ENTER no FIM -> reiniciando jogo")
+                            try:
+                                self.reiniciar_jogo()
+                                # tentar tocar ambiente com segurança
+                                if self.canal_ambiente:
+                                    try:
+                                        self.canal_ambiente.play(self.snd_ambiente, loops=-1)
+                                        self.canal_ambiente.set_volume(0.45)
+                                    except Exception:
+                                        try:
+                                            self.snd_ambiente.play(loops=-1)
+                                        except Exception:
+                                            pass
+                                else:
+                                    try:
+                                        self.snd_ambiente.play(loops=-1)
+                                    except Exception:
+                                        pass
+                                self.estado = EstadoJogo.JOGANDO
+                            except Exception:
+                                print("[ERROR] exceção em reiniciar_jogo() no FIM:")
+                                traceback.print_exc()
+                        elif evento.key == pygame.K_ESCAPE:
+                            print("[DEBUG] ESC no FIM -> voltar ao MENU e parar ambiente")
+                            try:
+                                if self.canal_ambiente:
+                                    try:
+                                        self.canal_ambiente.fadeout(400)
+                                    except Exception:
+                                        try:
+                                            self.snd_ambiente.stop()
+                                        except Exception:
+                                            pass
                             except Exception:
                                 pass
-                            for inimigo in self.inimigos:
-                                dist = math.hypot(inimigo.x - self.jogador.x, inimigo.y - self.jogador.y)
-                                if dist <= PING_RAIO + 60:
-                                    inimigo.ao_ser_revelado((self.jogador.x, self.jogador.y))
-                                    inimigo.revelado_ate = agora + PING_DURACAO
-                            if qtd_pings >= MAX_PINGS_ATRAIR:
-                                for inimigo in self.inimigos:
-                                    inimigo.estado = EstadoInimigo.PERSEGUIR
-                elif self.estado == EstadoJogo.FIM:
-                    if evento.key == pygame.K_RETURN:
-                        self.reiniciar_jogo()
-                        # tocar ambiente novamente com segurança
-                        if self.canal_ambiente:
-                            try:
-                                self.canal_ambiente.play(self.snd_ambiente, loops=-1)
-                                self.canal_ambiente.set_volume(0.45)
-                            except Exception:
-                                try:
-                                    self.snd_ambiente.play(loops=-1)
-                                except Exception:
-                                    pass
-                        else:
-                            try:
-                                self.snd_ambiente.play(loops=-1)
-                            except Exception:
-                                pass
-                        self.estado = EstadoJogo.JOGANDO
-                    elif evento.key == pygame.K_ESCAPE:
-                        if self.canal_ambiente:
-                            try:
-                                self.canal_ambiente.fadeout(400)
-                            except Exception:
-                                try:
-                                    self.snd_ambiente.stop()
-                                except Exception:
-                                    pass
-                        self.estado = EstadoJogo.MENU
+                            self.estado = EstadoJogo.MENU
+
+            except SystemExit:
+                # Propagar SystemExit para sair normalmente
+                raise
+            except Exception:
+                print("[ERROR] exceção não capturada em tratar_eventos():")
+                traceback.print_exc()
+        # for evento in pygame.event.get():
+        #     if evento.type == pygame.QUIT:
+        #         # tenta parar áudio com segurança
+        #         try:
+        #             if self.canal_ambiente:
+        #                 self.canal_ambiente.stop()
+        #         except Exception:
+        #             pass
+        #         pygame.quit()
+        #         sys.exit()
+        #     elif evento.type == pygame.KEYDOWN:
+        #         if self.estado == EstadoJogo.MENU:
+        #             if evento.key == pygame.K_RETURN:
+        #                 self.reiniciar_jogo()
+        #                 self.estado = EstadoJogo.JOGANDO
+        #             elif evento.key == pygame.K_ESCAPE:
+        #                 pygame.quit()
+        #                 sys.exit()
+        #         elif self.estado == EstadoJogo.JOGANDO:
+        #             if evento.key == pygame.K_ESCAPE:
+        #                 self.estado = EstadoJogo.MENU
+        #             elif evento.key == pygame.K_SPACE:
+        #                 agora = time.time()
+        #                 if self.jogador.pode_ping(agora):
+        #                     qtd_pings = self.jogador.fazer_ping(agora)
+        #                     self.pings.append((self.jogador.x, self.jogador.y, agora))
+        #                     # tocar ping (seguro mesmo sem mixer)
+        #                     try:
+        #                         self.snd_ping.play()
+        #                     except Exception:
+        #                         pass
+        #                     for inimigo in self.inimigos:
+        #                         dist = math.hypot(inimigo.x - self.jogador.x, inimigo.y - self.jogador.y)
+        #                         if dist <= PING_RAIO + 60:
+        #                             inimigo.ao_ser_revelado((self.jogador.x, self.jogador.y))
+        #                             inimigo.revelado_ate = agora + PING_DURACAO
+        #                     if qtd_pings >= MAX_PINGS_ATRAIR:
+        #                         for inimigo in self.inimigos:
+        #                             inimigo.estado = EstadoInimigo.PERSEGUIR
+        #         elif self.estado == EstadoJogo.FIM:
+        #             if evento.key == pygame.K_RETURN:
+        #                 self.reiniciar_jogo()
+        #                 # tocar ambiente novamente com segurança
+        #                 if self.canal_ambiente:
+        #                     try:
+        #                         self.canal_ambiente.play(self.snd_ambiente, loops=-1)
+        #                         self.canal_ambiente.set_volume(0.45)
+        #                     except Exception:
+        #                         try:
+        #                             self.snd_ambiente.play(loops=-1)
+        #                         except Exception:
+        #                             pass
+        #                 else:
+        #                     try:
+        #                         self.snd_ambiente.play(loops=-1)
+        #                     except Exception:
+        #                         pass
+        #                 self.estado = EstadoJogo.JOGANDO
+        #             elif evento.key == pygame.K_ESCAPE:
+        #                 if self.canal_ambiente:
+        #                     try:
+        #                         self.canal_ambiente.fadeout(400)
+        #                     except Exception:
+        #                         try:
+        #                             self.snd_ambiente.stop()
+        #                         except Exception:
+        #                             pass
+        #                 self.estado = EstadoJogo.MENU
 
     def atualizar(self, dt):
         teclas = pygame.key.get_pressed()
@@ -754,4 +863,23 @@ class JogoEco:
                     cp = pygame.Surface((48,48), pygame.SRCALPHA)
                     pygame.draw.circle(cp, (180,220,255,int(200*(1-frac))), (24,24), int(14*(1-frac)), width=2)
                     self.tela.blit(cp, (x-24, y-24))
+
+if __name__ == "__main__":
+    import traceback
+    try:
+        jogo = JogoEco()
+        # garante que iniciamos no MENU (ou mude para JOGANDO se preferir pular o menu)
+        jogo.estado = EstadoJogo.MENU
+        jogo.rodar()
+    except SystemExit:
+        # saída esperada (quando o usuário fecha a janela)
+        raise
+    except Exception:
+        print("[ERROR] exceção não tratada no main:")
+        traceback.print_exc()
+        try:
+            pygame.quit()
+        except Exception:
+            pass
+
 
