@@ -429,6 +429,9 @@ class JogoEco:
 
     def reiniciar_jogo(self):
         self.jogador = Jogador(LARGURA//2, ALTURA//2, self.img_jogador)
+        self.itens_max = 8           # máximo de itens no mapa ao mesmo tempo
+        self.tempo_proximo_respawn = time.time() + 6.0   # primeiro respawn em 6s
+        self.respawn_interval = 6.0  # respawn a cada 6s
 
         def spawn_seguro(x, y):
             min_dist = 160
@@ -608,7 +611,31 @@ class JogoEco:
                         self.pontuacao += 1
                         for _ in range(QTD_PARTICULAS):
                             self.particulas.append(Particula(ix, iy))
-
+        # respawn: se houver menos itens não-coletados que o máximo e já passou do tempo, adiciona um
+        nao_coletados = [it for it in self.itens if not it["coletado"]]
+        if len(nao_coletados) < self.itens_max and time.time() >= self.tempo_proximo_respawn:
+            # tenta spawnar 1 novo item em posição segura (reusa lógica do gerar_itens_aleatorios)
+            def tentar_spawn_um():
+                for _ in range(40):
+                    x = random.randint(40, LARGURA - 40)
+                    y = random.randint(40, ALTURA - 40)
+                    if math.hypot(x - self.jogador.x, y - self.jogador.y) < 140:
+                        continue
+                    ok = True
+                    for inim in self.inimigos:
+                        if math.hypot(x - inim.x, y - inim.y) < 100:
+                            ok = False
+                            break
+                    if not ok:
+                        continue
+                    if any(math.hypot(x - it["pos"][0], y - it["pos"][1]) < 60 for it in self.itens if not it["coletado"]):
+                        continue
+                    return {"pos": (x, y), "coletado": False}
+                return None
+            novo = tentar_spawn_um()
+            if novo:
+                self.itens.append(novo)
+            self.tempo_proximo_respawn = time.time() + self.respawn_interval
         for p in self.particulas:
             p.atualizar(dt)
         self.particulas = [p for p in self.particulas if p.idade < p.vida]
