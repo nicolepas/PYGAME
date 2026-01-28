@@ -754,3 +754,4 @@ class JogoEco:
                     cp = pygame.Surface((48,48), pygame.SRCALPHA)
                     pygame.draw.circle(cp, (180,220,255,int(200*(1-frac))), (24,24), int(14*(1-frac)), width=2)
                     self.tela.blit(cp, (x-24, y-24))
+
