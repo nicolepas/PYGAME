@@ -365,7 +365,7 @@ class JogoEco:
             pass
 
         self.tela = pygame.display.set_mode((LARGURA, ALTURA))
-        pygame.display.set_caption("ECO - aprimorado (PT-BR)")
+        pygame.display.set_caption("ECO DE LUZ")
         self.relogio = pygame.time.Clock()
         self.estado = EstadoJogo.MENU
 
@@ -659,7 +659,7 @@ class JogoEco:
     def desenhar_menu(self):
         self.tela.fill((8,8,18))
         fonte_titulo = pygame.font.SysFont("arial", 64)
-        titulo = fonte_titulo.render("ECO", True, (220,220,255))
+        titulo = fonte_titulo.render("ECO DE LUZ", True, (220,220,255))
         self.tela.blit(titulo, titulo.get_rect(center=(LARGURA//2, 90)))
 
         fonte_h = pygame.font.SysFont("arial", 20)
