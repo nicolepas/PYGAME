@@ -126,7 +126,7 @@ def carregar_som(nome):
 # PARTÍCULAS 
 
 class Particula:
-    def _init_(self, x, y):
+    def __init__(self, x, y):
         # posição inicial com pequena variação aleatória
         self.x = x + random.uniform(-6,6)
         self.y = y + random.uniform(-6,6)
@@ -182,7 +182,7 @@ class Particula:
 
 # ENTIDADES
 class Jogador:
-    def _init_(self, x, y, imagem):
+    def __init__(self, x, y, imagem):
         # posição inicial e sprite
         self.x = x; self.y = y
         self.imagem = imagem
@@ -197,6 +197,9 @@ class Jogador:
 
         # controle de dano
         self.ultimo_dano = -999  # timestamp do último dano recebido
+
+        # tempo de invencibilidade inicial
+        self.tempo_inicial_invencivel = 0.0
 
 
     def atualizar(self, dt, teclas):
@@ -244,8 +247,8 @@ class Jogador:
 
     def desenhar(self, tela, agora):
         # piscamento visual se invencível (piscando)
-        invencivel = (now := time.time()) - jogo.tempo_inicial_invicivel < INVULNERABILIDADE_INICIAL
-        pos_dano = (now - self.ultimo_dano) < COOLDOWN_DANO
+        invencivel = invencivel = (time.time() - self.tempo_inicial_invencivel) < INVULNERABILIDADE_INICIAL
+        pos_dano = (time.time() - self.ultimo_dano) < COOLDOWN_DANO
         alpha = 255
         if invencivel or pos_dano:
             # piscar baseado em seno
@@ -261,7 +264,7 @@ class Jogador:
         tela.blit(surf, surf.get_rect(center=(int(self.x), int(self.y))))
 
 class Inimigo:
-    def _init_(self, x, y, imagem, pontos_patrulha=None):
+    def __init__(self, x, y, imagem, pontos_patrulha=None):
         self.x = x; self.y = y
         self.imagem = imagem
         self.rect = imagem.get_rect(center=(x,y))
@@ -357,7 +360,7 @@ class Inimigo:
 # JOGO 
 
 class JogoEco:
-    def _init_(self):
+    def __init__(self):
         pygame.init()
         # evita exception se já inicializado/ambiente sem áudio
         try:
