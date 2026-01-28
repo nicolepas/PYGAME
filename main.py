@@ -739,7 +739,7 @@ class JogoEco:
                     inimigo.desenhar(self.tela, now)
 
              # desenhar jogador (usa estado global 'jogo' para acessar invencibilidade)
-            self.jogador.desenhar(self.tela, now)
+            self.jogador.desenhar(self.tela, now, self.tempo_inicial_invicivel)
 
               # desenhar pings visuais
             for (x,y,t) in self.pings:
