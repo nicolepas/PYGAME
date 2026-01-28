@@ -831,18 +831,221 @@ class JogoEco:
                 nearest = min(itens_visiveis, key=lambda it: math.hypot(it["pos"][0]-self.jogador.x, it["pos"][1]-self.jogador.y))
                 self._desenhar_seta_para(nearest["pos"])
 
+ 
     def desenhar_fim(self):
-        self.desenhar_jogo()
-        s = pygame.Surface((LARGURA, ALTURA), pygame.SRCALPHA)
-        s.fill((0,0,0,200))
-        self.tela.blit(s, (0,0))
-        fonte = pygame.font.SysFont("arial", 48)
-        fim = fonte.render("FIM DE JOGO", True, (255,180,180))
-        self.tela.blit(fim, fim.get_rect(center=(LARGURA//2, ALTURA//2 - 40)))
-        fonte2 = pygame.font.SysFont("arial", 24)
-        info = fonte2.render(f"Pontuação: {self.pontuacao}  Pressione ENTER para tentar novamente ou ESC para voltar ao menu", True, (230,230,230))
-        self.tela.blit(info, info.get_rect(center=(LARGURA//2, ALTURA//2 + 20)))
+        # função robusta e defensiva — evita que exceções fechem o jogo
+        try:
+            # --- garantir inicialização de estado usado ---
+            if not getattr(self, "_fim_started", False):
+                self._fim_started = True
+                self._fim_start_time = time.time()
+                self._confetes = []
+                cores = [(255,90,90),(255,200,70),(120,220,140),(120,180,255),(200,120,255)]
+                for i in range(60):
+                    x = random.uniform(0, LARGURA)
+                    y = random.uniform(-80, -10)
+                    vx = random.uniform(-60, 60)
+                    vy = random.uniform(80, 240)
+                    rot = random.uniform(0, math.pi*2)
+                    vrot = random.uniform(-4, 4)
+                    cor = random.choice(cores)
+                    size = random.uniform(6, 14)
+                    self._confetes.append({"x": x, "y": y, "vx": vx, "vy": vy, "rot": rot, "vrot": vrot, "col": cor, "size": size, "t": 0.0})
 
+                self._burst = []
+                for i in range(3):
+                    cx = random.uniform(LARGURA*0.25, LARGURA*0.75)
+                    cy = random.uniform(ALTURA*0.25, ALTURA*0.45)
+                    for k in range(18):
+                        ang = random.uniform(0, math.pi*2)
+                        s = random.uniform(80, 260)
+                        self._burst.append({"x": cx, "y": cy, "vx": math.cos(ang)*s, "vy": math.sin(ang)*s, "life": random.uniform(0.6,1.3), "age": 0.0, "col": random.choice(cores)})
+
+                self._display_score = 0
+                self._score_anim_len = 1.6
+                self._float_bits = []
+
+            # tempo e dt seguros
+            now = time.time()
+            last = getattr(self, "_fim_last_time", now)
+            dt = min(1/30.0, max(0.0, now - last))
+            self._fim_last_time = now
+
+            # atualizar confetes (simples física)
+            for c in self._confetes:
+                c["t"] += dt
+                c["vy"] += 320 * dt
+                c["x"] += c["vx"] * dt
+                c["y"] += c["vy"] * dt
+                c["rot"] += c["vrot"] * dt
+                if c["y"] > ALTURA + 40:
+                    c["y"] = random.uniform(-60, -10)
+                    c["x"] = random.uniform(0, LARGURA)
+                    c["vy"] = random.uniform(80, 180)
+                    c["vx"] = random.uniform(-60, 60)
+
+            # atualizar burst
+            novos_burst = []
+            for b in getattr(self, "_burst", []):
+                b["age"] += dt
+                b["x"] += b["vx"] * dt
+                b["y"] += b["vy"] * dt
+                b["vx"] *= (1.0 - 2.0*dt)
+                b["vy"] *= (1.0 - 2.0*dt)
+                if b["age"] < b.get("life", 0.5):
+                    novos_burst.append(b)
+            self._burst = novos_burst
+
+            # --- desenhar fundo animado ---
+            try:
+                self.tela.fill((8,6,18))
+            except Exception:
+                raise
+
+            grad = pygame.Surface((LARGURA, ALTURA), flags=pygame.SRCALPHA)
+            pulse = 1.0 + 0.08 * math.sin((now - getattr(self, "_fim_start_time", now)) * 2.6)
+            grd_r = int(max(LARGURA, ALTURA) * (0.6 * max(0.01, pulse)))
+            pygame.draw.circle(grad, (30,30,80,160), (LARGURA//2, int(ALTURA*0.38)), grd_r)
+            pygame.draw.circle(grad, (40,18,30,120), (LARGURA//2, int(ALTURA*0.75)), int(grd_r*0.6))
+            self.tela.blit(grad, (0,0))
+
+            # desenhar confetes
+            for c in self._confetes:
+                w = max(2, int(c["size"]*1.6))
+                h = max(2, int(c["size"]*0.9))
+                surf = pygame.Surface((w, h), pygame.SRCALPHA)
+                pygame.draw.rect(surf, c["col"], (0,0,w,h))
+                try:
+                    rs = pygame.transform.rotate(surf, math.degrees(c["rot"]))
+                    self.tela.blit(rs, (int(c["x"]-rs.get_width()/2), int(c["y"]-rs.get_height()/2)))
+                except Exception:
+                    pygame.draw.circle(self.tela, c["col"], (int(max(0,min(LARGURA,c["x"]))), int(max(0,min(ALTURA,c["y"])))), 2)
+
+            # desenhar bursts
+            for b in self._burst:
+                alpha = int(255 * max(0.0, 1.0 - (b["age"]/b.get("life",1.0))))
+                s = pygame.Surface((6,6), pygame.SRCALPHA)
+                s.fill((*b["col"], alpha))
+                self.tela.blit(s, (int(b["x"])-3, int(b["y"])-3))
+
+            # título principal
+            elapsed = now - getattr(self, "_fim_start_time", now)
+            pop_scale = 1.0 + 0.12 * math.exp(-elapsed*2.5) * math.cos(elapsed*8.0)
+            fonte_t = pygame.font.SysFont("arial", max(12, int(64 * pop_scale)), bold=True)
+            titulo = fonte_t.render("FIM DE JOGO", True, (255,220,220))
+            tit_rect = titulo.get_rect(center=(LARGURA//2, int(ALTURA*0.18)))
+            sh = fonte_t.render("FIM DE JOGO", True, (40,20,30))
+            self.tela.blit(sh, (tit_rect.x+6, tit_rect.y+6))
+            self.tela.blit(titulo, tit_rect)
+
+            # pontuação contada com easing
+            target = int(getattr(self, "pontuacao", 0))
+            t = min(1.0, elapsed / getattr(self, "_score_anim_len", 1.6))
+            ease = t * t * (3 - 2 * t)
+            cur = getattr(self, "_display_score", 0)
+            new = int(cur + (target - cur) * (0.06 + 0.9 * ease))
+            self._display_score = max(0, new)
+            fonte_score = pygame.font.SysFont("arial", 40, bold=True)
+            score_txt = fonte_score.render(f"PONTUAÇÃO: {self._display_score}", True, (255,245,200))
+            self.tela.blit(score_txt, score_txt.get_rect(center=(LARGURA//2, int(ALTURA*0.32))))
+
+            # selo brilhante
+            shine = 1.0 + 0.15 * math.sin((now - getattr(self, "_fim_start_time", now)) * 4.0)
+            selo_s = max(80, int(140 * shine))
+            selo = pygame.Surface((selo_s, selo_s), pygame.SRCALPHA)
+            pygame.draw.circle(selo, (255,240,200,140), (selo_s//2, selo_s//2), selo_s//2)
+            pygame.draw.circle(selo, (255,200,70,200), (selo_s//2, selo_s//2), selo_s//2 - 8, width=6)
+            try:
+                self.tela.blit(selo, (int(LARGURA*0.12), int(ALTURA*0.22)))
+            except Exception:
+                pass
+
+            # ---- REMOVIDO: tempo/estatísticas (solicitado) ----
+            # (antes aqui era desenhado "Tempo: Xm Ys  ·  Itens: N" — removido conforme pedido)
+
+            # botão RECOMEÇAR (ENTER)
+            btn_w, btn_h = 360, 52
+            bx = LARGURA//2 - btn_w//2
+            by = int(ALTURA*0.55)
+            btn_surf = pygame.Surface((btn_w, btn_h), pygame.SRCALPHA)
+            pygame.draw.rect(btn_surf, (255,130,80), (0,0,btn_w,btn_h), border_radius=12)
+            txtb = pygame.font.SysFont("arial", 20, bold=True).render("PRESS ENTER — RECOMEÇAR", True, (30,20,10))
+            btn_surf.blit(txtb, txtb.get_rect(center=(btn_w//2, btn_h//2)))
+            glow = pygame.Surface((btn_w+18, btn_h+18), pygame.SRCALPHA)
+            pygame.draw.rect(glow, (255,160,90,90), (0,0,btn_w+18,btn_h+18), border_radius=14)
+            self.tela.blit(glow, (bx-9, by-9))
+            self.tela.blit(btn_surf, (bx, by))
+
+            # --- AUMENTEI A CAIXA DO MENU (ESC) AQUI ---
+            # botão MENU (ESC) grande e proeminente
+            btn2_w, btn2_h = 340, 64   # aumentado
+            bx2 = LARGURA//2 - btn2_w//2
+            by2 = by + btn_h + 20
+            # fundo com leve gradiente/retângulo arredondado
+            btn2_surf = pygame.Surface((btn2_w, btn2_h), pygame.SRCALPHA)
+            pygame.draw.rect(btn2_surf, (70,70,110), (0,0,btn2_w,btn2_h), border_radius=14)
+            # uma borda sutil
+            pygame.draw.rect(btn2_surf, (110,110,150), (2,2,btn2_w-4,btn2_h-4), width=2, border_radius=12)
+            # texto maior e centralizado
+            t2font = pygame.font.SysFont("arial", 20, bold=True)
+            t2 = t2font.render("ESC — VOLTAR AO MENU", True, (240,240,240))
+            btn2_surf.blit(t2, ( (btn2_w - t2.get_width())//2, (btn2_h - t2.get_height())//2 ))
+            # glow e blit
+            glow2 = pygame.Surface((btn2_w+18, btn2_h+18), pygame.SRCALPHA)
+            pygame.draw.rect(glow2, (100,100,150,70), (0,0,btn2_w+18,btn2_h+18), border_radius=16)
+            self.tela.blit(glow2, (bx2-9, by2-9))
+            self.tela.blit(btn2_surf, (bx2, by2))
+
+            # dica sutil abaixo do menu
+            dica = pygame.font.SysFont("arial", 14).render("Dica: Explore áreas escuras — alguns itens estão escondidos!", True, (200,200,210))
+            self.tela.blit(dica, (LARGURA//2 - dica.get_width()//2, by2 + btn2_h + 12))
+
+            # floating bits decorativos
+            if len(self._float_bits) < 8 and random.random() < 0.08:
+                self._float_bits.append({"x": random.uniform(LARGURA*0.78, LARGURA*0.94), "y": random.uniform(ALTURA*0.25, ALTURA*0.6), "vy": random.uniform(-8, -30), "alpha": 255, "t": 0})
+            nb = []
+            for b in self._float_bits:
+                b["t"] += dt
+                b["y"] += b["vy"] * dt
+                b["alpha"] = max(0, b["alpha"] - 80 * dt)
+                if b["alpha"] > 6:
+                    nb.append(b)
+            self._float_bits = nb
+            for b in self._float_bits:
+                s = pygame.Surface((8,8), pygame.SRCALPHA)
+                s.fill((255,230,150,int(b["alpha"])))
+                self.tela.blit(s, (int(b["x"]), int(b["y"])))
+
+            # partículas leves sobre selo
+            for i in range(6):
+                rx = LARGURA*0.12 + random.uniform(-18,18)
+                ry = ALTURA*0.22 + random.uniform(-18,18)
+                pygame.draw.circle(self.tela, (255,255,200,80), (int(rx), int(ry)), random.randint(1,3))
+
+            # efeito final de texto quando a contagem terminou
+            if elapsed > getattr(self, "_score_anim_len", 1.6) + 0.2:
+                pulse2 = 1.0 + 0.08 * math.sin((now - getattr(self, "_fim_start_time", now)) * 6.0)
+                finale = pygame.font.SysFont("arial", 20, bold=True).render("MUITO BEM! Pressione ENTER para tentar novamente.", True, (255,240,220))
+                rectf = finale.get_rect(center=(LARGURA//2, int(ALTURA*0.48)))
+                glow2 = pygame.Surface((rectf.width+40, rectf.height+18), pygame.SRCALPHA)
+                pygame.draw.rect(glow2, (255,230,120,80), (0,0,rectf.width+40, rectf.height+18), border_radius=8)
+                self.tela.blit(glow2, (rectf.x-20, rectf.y-8))
+                self.tela.blit(finale, rectf)
+
+        except Exception as e:
+            # Se ocorrer qualquer exceção aqui, desenha fallback simples e imprime erro no console (rode pelo terminal para ver traceback)
+            try:
+                self.tela.fill((0,0,0))
+                fonte = pygame.font.SysFont("arial", 36, bold=True)
+                err = fonte.render("FIM DE JOGO", True, (240,240,240))
+                self.tela.blit(err, err.get_rect(center=(LARGURA//2, ALTURA//2 - 20)))
+                fonte2 = pygame.font.SysFont("arial", 18)
+                msg = fonte2.render("Ocorreu um erro ao desenhar a tela final. Veja o terminal.", True, (220,180,180))
+                self.tela.blit(msg, msg.get_rect(center=(LARGURA//2, ALTURA//2 + 20)))
+            except Exception:
+                pass
+            import traceback
+            traceback.print_exc()
 # Expor variável global para o método Jogador.desenhar que usamos (pequeno atalho)
 jogo = None
 
