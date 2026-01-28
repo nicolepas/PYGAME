@@ -468,7 +468,7 @@ class JogoEco:
             if self.estado == EstadoJogo.JOGANDO:
                 self.atualizar(dt)
             self.desenhar()
-
+# A função abaixo teve ajuda do ChatGPT:
     def tratar_eventos(self):
         for evento in pygame.event.get():
             if evento.type == pygame.QUIT:
@@ -833,7 +833,7 @@ class JogoEco:
                 nearest = min(itens_visiveis, key=lambda it: math.hypot(it["pos"][0]-self.jogador.x, it["pos"][1]-self.jogador.y))
                 self._desenhar_seta_para(nearest["pos"])
 
- 
+ # Código abaixo foi utilizado ajuda do ChatGPT:
     def desenhar_fim(self):
         # função robusta e defensiva — evita que exceções fechem o jogo
         try:
