@@ -37,3 +37,9 @@ ESC — voltar ao menu
 ### Ideia central:
 Em ECO, a luz é sua única aliada — e também o seu maior perigo.
 O jogo desafia o jogador a usar a iluminação de forma inteligente, transformando a luz em uma ferramenta estratégica, e não apenas visual.
+
+
+### Referências:
+- Utilizamos a própria pasta da diciplina  (https://insper.github.io/DesignDeSoftware/pygame/handout/)
+- Também usamos o ChatGPT para nos auxiliar nos erros pontuais e em algumas partes do projeto (todas as partes que foram utilizadas IA foram comentadas)
+- 
