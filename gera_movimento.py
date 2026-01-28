@@ -8,7 +8,7 @@ import struct
 import wave
 from pathlib import Path
 
-# CONFIGURAÇÃO 
+# -------- CONFIGURAÇÃO --------
 OUT_DIR = Path("assets/sons")
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -19,7 +19,7 @@ DURACAO = 1.0       # 1 segundo (ideal para loop)
 VOLUME = 0.18       # bem baixo (não cansativo)
 SAMPLE_RATE = 44100
 
-# GERAÇÃO 
+# -------- GERAÇÃO --------
 n_samples = int(SAMPLE_RATE * DURACAO)
 amp = int(32767 * VOLUME)
 
@@ -40,5 +40,5 @@ with wave.open(str(OUT_FILE), "wb") as wav:
     wav.setframerate(SAMPLE_RATE)
     wav.writeframes(frames)
 
-print(" movimento.wav gerado em:", OUT_FILE.resolve())
-print(" Use este som em loop enquanto o jogador se move.")
+print("✅ movimento.wav gerado em:", OUT_FILE.resolve())
+print("➡️ Use este som em loop enquanto o jogador se move.")
