@@ -41,6 +41,6 @@ O jogo desafia o jogador a usar a iluminação de forma inteligente, transforman
 
 ### Referências:
 - Utilizamos a própria pasta da diciplina  (https://insper.github.io/DesignDeSoftware/pygame/handout/)
-- Também usamos o ChatGPT para nos auxiliar em erros pontuais e em algumas partes do projeto (todas as partes que foram utilizadas IA foram comentadas)
+- Também usamos o ChatGPT para nos auxiliar em erros pontuais e em algumas partes do projeto (as partes que houveram maior auxílio do IA foram comentadas)
 - https://www-geeksforgeeks-org.translate.goog/python/pygame-tutorial/?_x_tr_sl=en&_x_tr_tl=pt&_x_tr_hl=pt&_x_tr_pto=tc&_x_tr_hist=true
 - https://www-pygame-org.translate.goog/docs/tut/newbieguide.html?_x_tr_sl=en&_x_tr_tl=pt&_x_tr_hl=pt&_x_tr_pto=tc
